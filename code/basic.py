@@ -5,6 +5,7 @@ import time
 import psutil
 import os 
 
+#Parsing Input File 
 def input_read(file):
     base_strings = []
     index_1 = []
@@ -33,6 +34,7 @@ def input_read(file):
                     j+=1
     return base_strings,index_1,index_2,k,j
 
+#Generating Sequences from input_read output 
 def generate_sequences(base_strings,index_1,index_2,k,j):
     sequences=[]
     seq1=base_strings[0]
@@ -48,6 +50,7 @@ def generate_sequences(base_strings,index_1,index_2,k,j):
         sequences.append(seq2)
     return sequences
 
+#mismatch penalty function to determine mismatch penalty from matrix 
 def mismatch_penalty(base_1,base_2):
     nucs="ACGT"
     index_1=nucs.index(base_1)
@@ -58,6 +61,7 @@ def mismatch_penalty(base_1,base_2):
                         [94,48,110,0]]
     return mismatch_matrix[index_1][index_2]
 
+#alignment function that fills dp table and outputs the alignment for both sequences and the alignment score 
 def alignment(seq1,seq2):
     # set value of gaps 
     gap_pen=30
@@ -111,9 +115,10 @@ def alignment(seq1,seq2):
     for k in range(len(seq1_list)):
         s1_final += seq1_list.pop()
         s2_final += seq2_list.pop()
-    wf = [s1_final, s2_final]
-    return dp[m][n],wf
+    seq = [s1_final, s2_final]
+    return dp[m][n],seq
 
+#memory function to track memory 
 def process_memory():
     pid=os.getpid()
     process = psutil.Process(pid) 
@@ -121,18 +126,23 @@ def process_memory():
     memory_consumed = int(memory_info.rss/1024)
     return memory_consumed
 
+#main function that orders the workflow of the functions to finding alignment 
 def main():
     file = sys.argv[1]
-    print("test")
+    output_name=sys.argv[2]
     start_time = time.time() 
     start_memory=process_memory()
     inputs=input_read(file)
     sequences=generate_sequences(inputs[0],inputs[1],inputs[2],inputs[3],inputs[4])
-    output=alignment(sequences[0],sequences[1])
+    alignment_output=alignment(sequences[0],sequences[1])
     end_time = time.time()
     end_memory=process_memory()
     time_taken = (end_time - start_time)*1000
     memory_used=(end_memory - start_memory)
-    return memory_used,time_taken,output
+    print(alignment_output[0],"\n",alignment_output[1][0],"\n",alignment_output[1][1],"\n",time_taken,"\n",memory_used)
+    output= (alignment_output[0],alignment_output[1][0],alignment_output[1][1],time_taken,memory_used)
+    output=np.array(output)
+    np.savetxt(output_name, output, fmt='%s', newline='\n')
 
-main()
+if __name__ == "__main__":
+    main()
