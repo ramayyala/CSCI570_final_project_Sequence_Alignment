@@ -139,7 +139,7 @@ def main():
     end_memory=process_memory()
     time_taken = (end_time - start_time)*1000
     memory_used=(end_memory - start_memory)
-    print(alignment_output[0],"\n",alignment_output[1][0],"\n",alignment_output[1][1],"\n",time_taken,"\n",memory_used)
+    #print(alignment_output[0],"\n",alignment_output[1][0],"\n",alignment_output[1][1],"\n",time_taken,"\n",memory_used)
     output= (alignment_output[0],alignment_output[1][0],alignment_output[1][1],time_taken,memory_used)
     output=np.array(output)
     np.savetxt(output_name, output, fmt='%s', newline='\n')
