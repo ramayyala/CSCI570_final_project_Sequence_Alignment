@@ -4,7 +4,7 @@ from resource import *
 import time
 import psutil
 import os 
-
+import tracemalloc
 #define gloabl variables
 mismatch_matrix = [[0,110,48,94],
                         [110,0,118,48],
@@ -136,16 +136,15 @@ def main():
     file = sys.argv[1]
     output_name=sys.argv[2]
     start_time = time.time() 
-    start_memory=process_memory()
+    tracemalloc.start(25)
     inputs=input_read(file)
     sequences=generate_sequences(inputs[0],inputs[1],inputs[2],inputs[3],inputs[4])
     alignment_output=alignment(sequences[0],sequences[1])
     end_time = time.time()
-    end_memory=process_memory()
+    size, peak = tracemalloc.get_traced_memory()
     time_taken = (end_time - start_time)*1000
-    memory_used=(end_memory - start_memory)
     #print(alignment_output[0],"\n",alignment_output[1][0],"\n",alignment_output[1][1],"\n",time_taken,"\n",memory_used)
-    output= (alignment_output[0],alignment_output[1][0],alignment_output[1][1],time_taken,memory_used)
+    output= (alignment_output[0],alignment_output[1][0],alignment_output[1][1],time_taken,(peak/1024))
     output=np.array(output)
     np.savetxt(output_name, output, fmt='%s', newline='\n')
 

@@ -210,16 +210,13 @@ def main():
     output_name=sys.argv[2]
     start_time = time.time() 
     tracemalloc.start(25)
-    start_memory=process_memory()
     inputs=input_read(file)
     sequences=generate_sequences(inputs[0],inputs[1],inputs[2],inputs[3],inputs[4])
     alignment_output=dc_alignment(sequences[0],sequences[1])
     alignment_score=score(alignment_output)
     end_time = time.time()
     size, peak = tracemalloc.get_traced_memory()
-    end_memory=process_memory()
     time_taken = (end_time - start_time)*1000
-    memory_used=(end_memory - start_memory)
 
     #print(alignment_output[0],"\n",alignment_output[1][0],"\n",alignment_output[1][1],"\n",time_taken,"\n",memory_used)
     output= (alignment_score,alignment_output[0],alignment_output[1],time_taken,(peak/1024))
