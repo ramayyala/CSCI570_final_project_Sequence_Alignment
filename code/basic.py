@@ -5,6 +5,20 @@ import time
 import psutil
 import os 
 
+#define gloabl variables
+mismatch_matrix = [[0,110,48,94],
+                        [110,0,118,48],
+                        [48,118,0,110],
+                        [94,48,110,0]]
+nuc_dict={
+        'A' : 0,
+        'C' : 1,
+        'G' : 2,
+        'T' : 3
+    }
+
+gap_pen=30
+
 #Parsing Input File 
 def input_read(file):
     base_strings = []
@@ -51,20 +65,11 @@ def generate_sequences(base_strings,index_1,index_2,k,j):
     return sequences
 
 #mismatch penalty function to determine mismatch penalty from matrix 
-def mismatch_penalty(base_1,base_2):
-    nucs="ACGT"
-    index_1=nucs.index(base_1)
-    index_2=nucs.index(base_2)
-    mismatch_matrix = [[0,110,48,94],
-                        [110,0,118,48],
-                        [48,118,0,110],
-                        [94,48,110,0]]
-    return mismatch_matrix[index_1][index_2]
+def mismatch_penalty(base_1,base_2,nuc_lib, mis_matrix):
+    return mis_matrix[nuc_lib[base_1]][nuc_lib[base_2]]
 
 #alignment function that fills dp table and outputs the alignment for both sequences and the alignment score 
 def alignment(seq1,seq2):
-    # set value of gaps 
-    gap_pen=30
     # build dp table
     m=len(seq1)
     n=len(seq2)
@@ -80,7 +85,7 @@ def alignment(seq1,seq2):
                 dp[i][j] = dp[i-1][j-1]
             # if the nucs don't match each other, then find min of the potential penalties 
             else:
-                dp[i][j] = min(dp[i-1][j-1] + mismatch_penalty(seq1[i-1],seq2[j-1]),
+                dp[i][j] = min(dp[i-1][j-1] + mismatch_penalty(seq1[i-1],seq2[j-1],nuc_dict, mismatch_matrix),
                                 dp[i-1][j] + gap_pen,
                                 dp[i][j-1] + gap_pen)
     
