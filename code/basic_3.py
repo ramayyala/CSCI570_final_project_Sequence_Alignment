@@ -2,9 +2,8 @@ import sys
 import numpy as np
 from resource import * 
 import time
-import psutil
-import os 
 import tracemalloc
+
 #define gloabl variables
 mismatch_matrix = [[0,110,48,94],
                         [110,0,118,48],
@@ -123,27 +122,21 @@ def alignment(seq1,seq2):
     seq = [s1_final, s2_final]
     return dp[m][n],seq
 
-#memory function to track memory 
-def process_memory():
-    pid=os.getpid()
-    process = psutil.Process(pid) 
-    memory_info = process.memory_full_info() 
-    memory_consumed = int(memory_info.rss/1024)
-    return memory_consumed
-
 #main function that orders the workflow of the functions to finding alignment 
 def main():
+    #tracks args from command line
     file = sys.argv[1]
     output_name=sys.argv[2]
+    #start memory and time tracing 
     start_time = time.time() 
     tracemalloc.start(25)
     inputs=input_read(file)
     sequences=generate_sequences(inputs[0],inputs[1],inputs[2],inputs[3],inputs[4])
     alignment_output=alignment(sequences[0],sequences[1])
+    #end time and memory tracing 
     end_time = time.time()
     size, peak = tracemalloc.get_traced_memory()
     time_taken = (end_time - start_time)*1000
-    #print(alignment_output[0],"\n",alignment_output[1][0],"\n",alignment_output[1][1],"\n",time_taken,"\n",memory_used)
     output= (alignment_output[0],alignment_output[1][0],alignment_output[1][1],time_taken,(peak/1024))
     output=np.array(output)
     np.savetxt(output_name, output, fmt='%s', newline='\n')

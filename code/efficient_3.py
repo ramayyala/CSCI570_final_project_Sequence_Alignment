@@ -2,8 +2,6 @@ import sys
 import numpy as np
 from resource import * 
 import time
-import psutil
-import os
 import tracemalloc
 
 
@@ -130,7 +128,7 @@ def dc_alignment(seq1,seq2):
  
     m=len(seq1)
     n=len(seq2)
-    #if the length of the sequences is less than 2, then just use the dp algorithm as a bound 
+    #if the length of the sequences is less than 2, then just use the dp algorithm as base case  
     if n<=2 or m<=2:
         return alignment(seq1,seq2)
     f = np.zeros((m + 1, 2))
@@ -143,7 +141,7 @@ def dc_alignment(seq1,seq2):
         front_len=n//2+1
         back_len=n//2
 
-
+    #fowards algo 
     for i in range(m + 1):
         f[i, 0] = i * gap_pen
 
@@ -155,6 +153,7 @@ def dc_alignment(seq1,seq2):
                             f[i, 0] + gap_pen)
         f=np.flip(f,1)
     
+    #backwards algo 
     #reverse the strings
     seq1_inv=seq1[::-1]
     seq2_inv=seq2[::-1]
@@ -173,16 +172,12 @@ def dc_alignment(seq1,seq2):
     for i in range(m + 1):
         if f[i, 0] + g[m - i, 0] < f[q, 0] + g[m - q, 0]:
             q = i
-    # print(f[q, 0] + g[m - q, 0])
-    #print("F table:")
-    #print(f)
-    #print("G table:")
-    #print(g)
+    #recursion calls
     alignment_x1, alignment_y1 = dc_alignment(seq1[:q], seq2[:front_len])
     alignment_x2, alignment_y2 = dc_alignment(seq1[q:], seq2[front_len:])
     return alignment_x1 + alignment_x2, alignment_y1 + alignment_y2
 
-#score function to calculate alginment score 
+#score function to calculate alginment score
 def score(output):
     mismatch=0
     gap=0
@@ -194,15 +189,6 @@ def score(output):
                 mismatch+=mismatch_penalty(output[0][i],output[1][i],nuc_dict, mismatch_matrix)
     score=mismatch+gap
     return score 
-
-
-#memory function to track memory 
-def process_memory():
-    pid=os.getpid()
-    process = psutil.Process(pid) 
-    memory_info = process.memory_full_info() 
-    memory_consumed = int(memory_info.rss/1024)
-    return memory_consumed
 
 #main function that orders the workflow of the functions to finding alignment 
 def main():
@@ -217,8 +203,6 @@ def main():
     end_time = time.time()
     size, peak = tracemalloc.get_traced_memory()
     time_taken = (end_time - start_time)*1000
-
-    #print(alignment_output[0],"\n",alignment_output[1][0],"\n",alignment_output[1][1],"\n",time_taken,"\n",memory_used)
     output= (alignment_score,alignment_output[0],alignment_output[1],time_taken,(peak/1024))
     output=np.array(output)
     np.savetxt(output_name, output, fmt='%s', newline='\n')
